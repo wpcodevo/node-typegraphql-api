@@ -1,4 +1,8 @@
-import { AuthenticationError, ForbiddenError } from 'apollo-server-core';
+import {
+  AuthenticationError,
+  ForbiddenError,
+  ValidationError,
+} from 'apollo-server-core';
 import config from 'config';
 import { CookieOptions } from 'express';
 import errorHandler from '../controllers/error.controller';
@@ -62,6 +66,8 @@ export default class UserService {
         user,
       };
     } catch (error: any) {
+      if (error.code === 11000)
+        return new ValidationError('Email already exists');
       errorHandler(error);
     }
   }
