@@ -7,7 +7,8 @@ import {
 } from '@typegoose/typegoose';
 import { MinLength } from 'class-validator';
 import { Field, InputType, ObjectType } from 'type-graphql';
-import { User, UserData } from './user.schema';
+import { User } from '../models/user.model';
+import { UserData } from './user.schema';
 
 @ModelOptions({
   schemaOptions: {
