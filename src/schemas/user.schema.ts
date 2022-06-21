@@ -1,79 +1,9 @@
-import {
-  getModelForClass,
-  prop,
-  pre,
-  ModelOptions,
-  Severity,
-  index,
-} from '@typegoose/typegoose';
 import { Field, InputType, ObjectType } from 'type-graphql';
 import { IsEmail, MaxLength, MinLength } from 'class-validator';
-import bcrypt from 'bcryptjs';
-import config from 'config';
-
-@pre<User>('save', async function (next) {
-  if (!this.isModified('password')) return next();
-
-  this.password = await bcrypt.hash(
-    this.password,
-    config.get<number>('costFactor')
-  );
-  this.passwordConfirm = undefined;
-  return next();
-})
-@ModelOptions({
-  schemaOptions: {
-    timestamps: true,
-  },
-  options: {
-    allowMixed: Severity.ALLOW,
-  },
-})
-@index({ email: 1 })
-export class User {
-  @Field(() => String)
-  readonly _id: string;
-
-  @Field(() => String)
-  @prop({ required: true })
-  name: string;
-
-  @Field(() => String)
-  @prop({ required: true, unique: true, lowercase: true })
-  email: string;
-
-  @Field(() => String)
-  @prop({ default: 'user' })
-  role: string;
-
-  @Field(() => String)
-  @prop({ required: true, select: false })
-  password: string;
-
-  @Field(() => String)
-  @prop({ required: true })
-  passwordConfirm: string | undefined;
-
-  @Field(() => String)
-  @prop({ default: 'default.jpeg' })
-  photo: string;
-
-  @Field(() => Boolean)
-  @prop({ default: true, select: false })
-  verified: boolean;
-
-  static async comparePasswords(
-    hashedPassword: string,
-    candidatePassword: string
-  ) {
-    return await bcrypt.compare(candidatePassword, hashedPassword);
-  }
-}
 
 @InputType()
 export class SignUpInput {
   @Field(() => String)
-  @prop({ required: true })
   name: string;
 
   @IsEmail()
@@ -148,6 +78,3 @@ export class LoginResponse {
   @Field(() => String)
   access_token: string;
 }
-
-const UserModel = getModelForClass<typeof User>(User);
-export default UserModel;
