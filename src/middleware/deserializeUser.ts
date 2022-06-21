@@ -1,11 +1,7 @@
-import {
-  ApolloError,
-  AuthenticationError,
-  ForbiddenError,
-} from 'apollo-server-core';
+import { AuthenticationError, ForbiddenError } from 'apollo-server-core';
 import { Request } from 'express';
 import errorHandler from '../controllers/error.controller';
-import UserModel from '../schemas/user.schema';
+import UserModel from '../models/user.model';
 import redisClient from '../utils/connectRedis';
 import { verifyJwt } from '../utils/jwt';
 

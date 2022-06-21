@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { User } from '../schemas/user.schema';
+import { User } from '../models/user.model';
 
 export type Context = {
   req: Request;

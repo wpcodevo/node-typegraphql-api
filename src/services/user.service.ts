@@ -1,13 +1,19 @@
-import { AuthenticationError, ForbiddenError } from 'apollo-server-core';
+import {
+  AuthenticationError,
+  ForbiddenError,
+  ValidationError,
+} from 'apollo-server-core';
 import config from 'config';
 import { CookieOptions } from 'express';
 import errorHandler from '../controllers/error.controller';
 import deserializeUser from '../middleware/deserializeUser';
-import UserModel, { LoginInput, User } from '../schemas/user.schema';
+import UserModel, { User } from '../models/user.model';
+import { LoginInput } from '../schemas/user.schema';
 import { Context } from '../types/context';
 import redisClient from '../utils/connectRedis';
 import { signJwt, verifyJwt } from '../utils/jwt';
 
+// Cookie Options
 const accessTokenExpiresIn = config.get<number>('accessTokenExpiresIn');
 const refreshTokenExpiresIn = config.get<number>('refreshTokenExpiresIn');
 
@@ -36,6 +42,7 @@ async function findByEmail(email: string): Promise<User | null> {
   return UserModel.findOne({ email }).select('+password');
 }
 
+// Sign JWT Tokens
 function signTokens(user: User) {
   const userId: string = user._id.toString();
   const access_token = signJwt({ userId }, 'accessTokenPrivateKey', {
@@ -54,6 +61,7 @@ function signTokens(user: User) {
 }
 
 export default class UserService {
+  // Register User
   async signUpUser(input: Partial<User>) {
     try {
       const user = await UserModel.create(input);
@@ -62,10 +70,14 @@ export default class UserService {
         user,
       };
     } catch (error: any) {
+      if (error.code === 11000) {
+        return new ValidationError('Email already exists');
+      }
       errorHandler(error);
     }
   }
 
+  // Login User
   async loginUser(input: LoginInput, { res }: Context) {
     try {
       const message = 'Invalid email or password';
@@ -101,6 +113,7 @@ export default class UserService {
     }
   }
 
+  // Get Currently Logged In User
   async getMe({ req, res, deserializeUser }: Context) {
     try {
       const user = await deserializeUser(req);
@@ -113,6 +126,7 @@ export default class UserService {
     }
   }
 
+  // Refresh Access Token
   async refreshAccessToken({ req, res }: Context) {
     try {
       // Get the refresh token
@@ -169,6 +183,7 @@ export default class UserService {
     }
   }
 
+  // Logout User
   async logoutUser({ req, res }: Context) {
     try {
       const user = await deserializeUser(req);
@@ -183,7 +198,6 @@ export default class UserService {
 
       return true;
     } catch (error) {
-      console.log(error);
       errorHandler(error);
     }
   }
