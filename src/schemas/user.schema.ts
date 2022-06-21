@@ -5,8 +5,6 @@ import {
   ModelOptions,
   Severity,
   index,
-  ReturnModelType,
-  queryMethod,
 } from '@typegoose/typegoose';
 import { Field, InputType, ObjectType } from 'type-graphql';
 import { IsEmail, MaxLength, MinLength } from 'class-validator';
@@ -32,7 +30,6 @@ import config from 'config';
   },
 })
 @index({ email: 1 })
-@ObjectType()
 export class User {
   @Field(() => String)
   readonly _id: string;
