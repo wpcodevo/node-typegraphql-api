@@ -13,10 +13,12 @@ const refreshTokenExpiresIn = config.get<number>('refreshTokenExpiresIn');
 
 const cookieOptions: CookieOptions = {
   httpOnly: true,
-  // domain: 'localhost',
+  domain: 'localhost',
   sameSite: 'none',
   secure: true,
 };
+
+if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
 const accessTokenCookieOptions = {
   ...cookieOptions,
@@ -29,8 +31,6 @@ const refreshTokenCookieOptions = {
   maxAge: refreshTokenExpiresIn * 60 * 1000,
   expires: new Date(Date.now() + refreshTokenExpiresIn * 60 * 1000),
 };
-
-if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
 async function findByEmail(email: string): Promise<User | null> {
   return UserModel.findOne({ email }).select('+password');
@@ -183,7 +183,6 @@ export default class UserService {
 
       return true;
     } catch (error) {
-      console.log(error);
       errorHandler(error);
     }
   }
